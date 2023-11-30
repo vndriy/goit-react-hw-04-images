@@ -42,6 +42,7 @@ export class App extends Component {
   }
 
   handleSubmit = newQuery => {
+    if (!newQuery.trim()) return alert('Can not be empty');
     this.setState({
       query: newQuery,
       page: 1,

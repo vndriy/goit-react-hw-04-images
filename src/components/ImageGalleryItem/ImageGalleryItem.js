@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { ModalWindow } from 'components/App/Modal/Modal';
+import { ModalWindow } from 'components/Modal/Modal';
 import { ImgItem, ImgSrc } from './ImageGalleryItem.styled';
 
 export class ImageGalleryItem extends Component {
