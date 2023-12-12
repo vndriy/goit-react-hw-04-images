@@ -1,7 +1,7 @@
 import { Div, ErrorStyled } from './App.styled';
 
 import { fetchImages } from '../../api';
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Searchbar } from '../Searchbar/Searchbar';
 import { ImageGallery } from 'components/ImageGallery/ImageGallery';
@@ -9,72 +9,64 @@ import { GlobalStyled } from 'components/GlobalStyle';
 import { Button } from 'components/Button/Button';
 import { Loader } from 'components/Loader/Loader';
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    isLoading: false,
-    error: false,
-    totalPages: null,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [totalPages, setTotalPages] = useState(null);
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
+  useEffect(() => {
+    if (!query) {
+      return;
+    }
+    async function getPages() {
       try {
-        this.setState({ isLoading: true, error: false });
-        const searchRequest = await fetchImages(query, page);
+        setIsLoading(true);
+        setError(false);
 
-        this.setState(prevState => {
-          return {
-            images: [...prevState.images, ...searchRequest.hits],
-            isLoading: false,
-            totalPages: Math.ceil(searchRequest.totalHits / 12),
-          };
-        });
+        const searchRequest = await fetchImages(query, page);
+        const { hits, totalHits } = searchRequest;
+
+        setImages(prevImages => [...prevImages, ...hits]);
+        setIsLoading(false);
+        setTotalPages(Math.ceil(totalHits / 12));
       } catch (error) {
-        this.setState({ error: true });
+        setError(true);
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
     }
-  }
+    getPages();
+  }, [query, page]);
 
-  handleSubmit = newQuery => {
+  const handleSubmit = newQuery => {
     if (!newQuery.trim()) return alert('Can not be empty');
-    this.setState({
-      query: newQuery,
-      page: 1,
-      images: [],
-    });
+    setQuery(newQuery);
+    setPage(1);
+    setImages([]);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => {
-      return {
-        page: prevState.page + 1,
-      };
-    });
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  render() {
-    const { isLoading, images, error, page, totalPages } = this.state;
-    const isGallery = images.length !== 0;
-    const isLoadMore = page < totalPages;
-    return (
-      <Div>
-        <Searchbar onSubmit={this.handleSubmit} />
-        {error && (
-          <ErrorStyled>
-            Oops! Something went wrong! Please try reloading this page!
-          </ErrorStyled>
-        )}
-        {isGallery && <ImageGallery images={images} />}
-        {isGallery && isLoadMore && <Button loadMore={this.handleLoadMore} />}
-        <Loader isLoading={isLoading} />
-        <GlobalStyled />
-      </Div>
-    );
-  }
-}
+  const isGallery = images.length !== 0;
+  const isLoadMore = page < totalPages;
+
+  return (
+    <Div>
+      <Searchbar onSubmit={handleSubmit} />
+      {error && (
+        <ErrorStyled>
+          Oops! Something went wrong! Please try reloading this page!
+        </ErrorStyled>
+      )}
+      {isGallery && <ImageGallery images={images} />}
+      {isGallery && isLoadMore && <Button loadMore={handleLoadMore} />}
+      <Loader isLoading={isLoading} />
+      <GlobalStyled />
+    </Div>
+  );
+};

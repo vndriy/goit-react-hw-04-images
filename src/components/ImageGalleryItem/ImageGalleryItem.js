@@ -1,32 +1,24 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { ModalWindow } from 'components/Modal/Modal';
 import { ImgItem, ImgSrc } from './ImageGalleryItem.styled';
 
-export class ImageGalleryItem extends Component {
-  state = {
-    isModalOpen: false,
+export const ImageGalleryItem = ({ imgPreviewUrl, largeImg, id, tags }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModal = () => {
+    setIsModalOpen(prevIsModalOpen => !prevIsModalOpen);
   };
 
-  handleModal = () => {
-    this.setState(prevState => ({
-      isModalOpen: !prevState.isModalOpen,
-    }));
-  };
-
-  render() {
-    const { imgPreviewUrl, largeImg, id, tags } = this.props;
-
-    return (
-      <>
-        <ImgItem key={id} onClick={this.handleModal}>
-          <ImgSrc src={imgPreviewUrl} alt={tags} />
-        </ImgItem>
-        <ModalWindow
-          modalIsOpen={this.state.isModalOpen}
-          closeModal={this.handleModal}
-          largeImg={largeImg}
-        />
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <ImgItem key={id} onClick={handleModal}>
+        <ImgSrc src={imgPreviewUrl} alt={tags} />
+      </ImgItem>
+      <ModalWindow
+        modalIsOpen={isModalOpen}
+        closeModal={handleModal}
+        largeImg={largeImg}
+      />
+    </>
+  );
+};
