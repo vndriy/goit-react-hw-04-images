@@ -67,7 +67,7 @@ export class App extends Component {
         <Searchbar onSubmit={this.handleSubmit} />
         {error && (
           <ErrorStyled>
-            Oops! Something went wrong! Please try reloading this page
+            Oops! Something went wrong! Please try reloading this page!
           </ErrorStyled>
         )}
         {isGallery && <ImageGallery images={images} />}
